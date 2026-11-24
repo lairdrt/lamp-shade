@@ -1,4 +1,4 @@
-// Lamp Shade V0.2 -- dimensional prototype, not installation qualified.
+// Lamp Shade V0.3 -- dimensional prototype, not installation qualified.
 // Z=0 at ceiling-facing upper lip; dome points upward in print coordinates.
 mode="full"; // [full:ring]
 od=228; height=75; t=2; wall_inset=12; overhang=3; clear_h=11;
@@ -19,14 +19,17 @@ function rounded_linear(x,w,b)= x<=0?0:x>=w?1:b<=0?x/w:x<b?x*x/(2*b*(w-b)):x>w-b
 function slot(a)=slot_shift*rounded_linear(so-abs(u(a)),so-si,min((so-si)/3,corner_r/rw*180/PI));
 function ramp_fraction(a)=clamp((u(a)+si+ra)/ra,0,1);
 function ramp_h(a)=ramp_left_h+(clear_h-ramp_left_h)*ramp_fraction(a);
-function ramp_rad(a)=ramp_depth*clamp((u(a)+si+ra)/ea,0,1)*smooth((-si-u(a))/0.6);
+// Rising portion ends at the left inner tab edge; continue beneath tab.
+// Follow the same rounded RHS return as the upper lip.
+function ramp_rhs(a)=u(a)<=si?1:slot(a)/slot_shift;
+function ramp_rad(a)=ramp_depth*clamp((u(a)+si+ra)/ea,0,1)*ramp_rhs(a);
 function rect_rad(a)=recess_depth*smooth((si-abs(u(a)))/0.6);
 // Keep the recessed rectangle anchored to the displaced tab, not the nominal ring.
 // Carry the tab displacement through the upper recess height, taper at its lower edge.
 // Ramp and tab recess are alternative inward wall envelopes, not additive offsets.
 function recess_gate(z)=smooth((t+recess_h+0.25-z)/0.5);
 function tab_wall_shift(a,z)=(slot(a)+rect_rad(a))*recess_gate(z);
-function ramp_wall_shift(a,z)=ramp_rad(a)*smooth((z-(t+clear_h-ramp_h(a))+0.15)/0.45);
+function ramp_wall_shift(a,z)=ramp_rad(a)*(ramp_h(a)>=clear_h?1:smooth((z-(t+clear_h-ramp_h(a))+0.15)/0.45));
 function shift(a,z)=max(tab_wall_shift(a,z),ramp_wall_shift(a,z));
 zs=[for(j=[0:44]) t+clear_h*j/44];
 function ring_section(a)=concat(
