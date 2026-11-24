@@ -1,4 +1,4 @@
-// Lamp Shade V0.4 -- dimensional prototype, not installation qualified.
+// Lamp Shade V0.5 -- dimensional prototype, not installation qualified.
 // Z=0 at ceiling-facing upper lip; dome points upward in print coordinates.
 mode="full"; // [full:ring]
 od=228; height=75; t=2; wall_inset=12; overhang=3; clear_h=11;
@@ -23,22 +23,22 @@ function ramp_h(a)=ramp_left_h+(clear_h-ramp_left_h)*ramp_fraction(a);
 // Follow the same rounded RHS return as the upper lip.
 function ramp_rhs(a)=u(a)<=si?1:slot(a)/slot_shift;
 function ramp_rad(a)=ramp_depth*clamp((u(a)+si+ra)/ea,0,1)*ramp_rhs(a);
-function rect_rad(a)=recess_depth*smooth((si-abs(u(a)))/0.6);
-// The displaced tab defines the underlying wall throughout its height.
-// Merge that wall with the existing ramp envelope; only the small rectangular
-// recess tapers out below the tab. Do not taper out the entire tab displacement.
-function recess_gate(z)=smooth((t+recess_h+0.25-z)/0.5);
+// V0.5 isolation: wall follows only the ramp; rectangular recess disabled.
+// Upper tab indentation affects only the free outer edge of the top lip.
 function ramp_wall_shift(a,z)=ramp_rad(a)*(ramp_h(a)>=clear_h?1:smooth((z-(t+clear_h-ramp_h(a))+0.15)/0.45));
-function base_wall_shift(a,z)=max(slot(a),ramp_wall_shift(a,z));
-function shift(a,z)=base_wall_shift(a,z)+rect_rad(a)*recess_gate(z);
+function shift(a,z)=ramp_wall_shift(a,z);
+function lip_inner(a)=ri-shift(a,t);
+// Limit the free-edge notch so the lip cannot cross the continuous inner wall.
+// Preserve a minimum radial material width of t at the notch.
+function lip_outer(a)=max(rw+overhang-slot(a),lip_inner(a)+t);
 zs=[for(j=[0:44]) t+clear_h*j/44];
 function ring_section(a)=concat(
- [[rw+overhang-slot(a),0],[rw+overhang-slot(a),t]],
+ [[lip_outer(a),0],[lip_outer(a),t]],
  [for(z=zs) [rw-shift(a,z),z]],
  [[R-1,t+clear_h],[R,t+clear_h+0.6],[R,H-0.6],[R-1,H]],
  [[ri,H]],
  [for(j=[len(zs)-1:-1:0]) [ri-shift(a,zs[j]),zs[j]]],
- [[ri-slot(a),0]]);
+ [[lip_inner(a),0]]);
 function xyz(p,a)=[p[0]*cos(a),p[0]*sin(a),p[1]];
 function section(a)=mode=="ring"?ring_section(a):full_section(a);
 profile=[[0,0],[25,1.8],[50,7.2],[75,18.2],[90,28.8],[100,37.8],[105,43.2],[110,49.4],[112,53],[113.4,56],[114,59.5]];
@@ -53,7 +53,7 @@ function full_section(a)=let(q=ring_section(a)) concat(
  [for(i=[0:len(P)-2]) if(inner(i)[1]>H+0.1) inner(i)],
  [[R-t,H],[ri,H]],
  [for(j=[len(zs)-1:-1:0]) [ri-shift(a,zs[j]),zs[j]]],
- [[ri-slot(a),0]]);
+ [[lip_inner(a),0]]);
 module model(){
  pts=[for(i=[0:N-1]) each [for(p=section(i*360/N)) xyz(p,i*360/N)]];
  faces=[for(i=[0:N-1],j=[0:M-1]) each let(a=i*M+j,b=i*M+(j+1)%M,c=((i+1)%N)*M+(j+1)%M,d=((i+1)%N)*M+j)
