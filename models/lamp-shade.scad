@@ -1,4 +1,4 @@
-// Lamp Shade V0.11 -- dimensional prototype, not installation qualified.
+// Lamp Shade V0.12 -- dimensional prototype, not installation qualified.
 // Z=0 at ceiling-facing upper lip; dome points upward in print coordinates.
 mode="full"; // [full:ring]
 od=228; height=75; t=2; wall_inset=12; overhang=3; clear_h=11;
@@ -28,11 +28,13 @@ function ramp_rad(a)=ramp_depth*clamp((u(a)+si+ra)/ea,0,1)*
 // V0.11 diagnostic: only the accepted V0.8 ramp defines the wall.
 // Keep slot() solely as the reference for the unchanged RHS return.
 // No independent tab notch, rectangular recess, or lip junction blend.
-// The upper lip follows the wall at its top with constant radial width.
+// Diagnostic circular upper lip: both top edges are independent of ramp.
+// Existing section topology connects the inner top edge to the wall at z=t
+// with a bevel where necessary; the outer underside spans to the wall.
 function ramp_wall_shift(a,z)=ramp_rad(a)*(ramp_h(a)>=clear_h?1:smooth((z-(t+clear_h-ramp_h(a))+0.15)/0.45));
 function shift(a,z)=ramp_wall_shift(a,z);
-function lip_inner(a)=ri-shift(a,t);
-function lip_outer(a)=lip_inner(a)+t+overhang;
+function lip_inner(a)=ri;
+function lip_outer(a)=rw+overhang;
 zs=[for(j=[0:44]) t+clear_h*j/44];
 function ring_section(a)=concat(
  [[lip_outer(a),0],[lip_outer(a),t]],
