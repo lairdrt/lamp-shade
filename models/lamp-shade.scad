@@ -1,4 +1,4 @@
-// Lamp Shade V0.16 -- dimensional prototype, not installation qualified.
+// Lamp Shade V0.17 -- dimensional prototype, not installation qualified.
 // Z=0 at ceiling-facing upper lip; dome points upward in print coordinates.
 mode="full"; // [full:ring]
 od=228; height=75; t=2; wall_inset=12; overhang=3; clear_h=11;
@@ -17,7 +17,9 @@ function local(a)=((a-lock_phase+180/lock_count)% (360/lock_count)+360/lock_coun
 function u(a)=-local(a);
 function rounded_linear(x,w,b)= x<=0?0:x>=w?1:b<=0?x/w:x<b?x*x/(2*b*(w-b)):x>w-b?1-(w-x)*(w-x)/(2*b*(w-b)):(x-b/2)/(w-b);
 function slot(a)=slot_shift*rounded_linear(so-abs(u(a)),so-si,min((so-si)/3,corner_r/rw*180/PI));
-function ramp_fraction(a)=clamp((u(a)+si+ra)/ra,0,1);
+// V0.17: preserve ramp start and radial envelope; finish the rising
+// upper edge exactly at the left boundary of the rectangular recess.
+function ramp_fraction(a)=clamp((u(a)+si+ra)/(si+ra-recess_half_angle),0,1);
 function ramp_h(a)=ramp_left_h+(clear_h-ramp_left_h)*ramp_fraction(a);
 // Rising portion ends at the left inner tab edge; continue beneath tab.
 // Follow the same rounded RHS return as the upper lip.
