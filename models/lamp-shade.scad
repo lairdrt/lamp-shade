@@ -1,4 +1,4 @@
-// Lamp Shade V0.10 -- dimensional prototype, not installation qualified.
+// Lamp Shade V0.11 -- dimensional prototype, not installation qualified.
 // Z=0 at ceiling-facing upper lip; dome points upward in print coordinates.
 mode="full"; // [full:ring]
 od=228; height=75; t=2; wall_inset=12; overhang=3; clear_h=11;
@@ -25,25 +25,14 @@ function ramp_h(a)=ramp_left_h+(clear_h-ramp_left_h)*ramp_fraction(a);
 // return reaches that depth, then follow its actual radial path.
 function ramp_rad(a)=ramp_depth*clamp((u(a)+si+ra)/ea,0,1)*
     (u(a)<=si?1:min(ramp_depth,slot(a))/ramp_depth);
-// V0.6: both lip edges derive from a single rounded radial profile.
-// Preserve the V0.8 ramp below the lip junction.
-lip_join_h=2; // provisional smooth junction height (mm)
+// V0.11 diagnostic: only the accepted V0.8 ramp defines the wall.
+// Keep slot() solely as the reference for the unchanged RHS return.
+// No independent tab notch, rectangular recess, or lip junction blend.
+// The upper lip follows the wall at its top with constant radial width.
 function ramp_wall_shift(a,z)=ramp_rad(a)*(ramp_h(a)>=clear_h?1:smooth((z-(t+clear_h-ramp_h(a))+0.15)/0.45));
-function lip_inner(a)=ri-slot(a);
+function shift(a,z)=ramp_wall_shift(a,z);
+function lip_inner(a)=ri-shift(a,t);
 function lip_outer(a)=lip_inner(a)+t+overhang;
-// Connect the full-width displaced lip to the shallower ramp continuously.
-// Blend only within the tab region and the first lip_join_h mm below the lip.
-function baseline_shift(a,z)=let(b=abs(u(a))<=so?smooth((t+lip_join_h-z)/lip_join_h):0)
-    (1-b)*ramp_wall_shift(a,z)+b*slot(a);
-// V0.10: recess depth is referenced to the accepted ramp, not the
-// already displaced lip junction. Merge envelopes rather than stacking offsets.
-// This gives a single monotonic return from lip to recess to ramp.
-recess_blend=0.5;
-recess_enabled=true;
-function recess_offset(a,z)=recess_enabled ?
-    recess_depth*smooth((si-abs(u(a)))/(recess_blend/rw*180/PI))
-    *smooth((t+recess_h-z)/recess_blend) : 0;
-function shift(a,z)=max(baseline_shift(a,z),ramp_wall_shift(a,z)+recess_offset(a,z));
 zs=[for(j=[0:44]) t+clear_h*j/44];
 function ring_section(a)=concat(
  [[lip_outer(a),0],[lip_outer(a),t]],
