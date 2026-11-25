@@ -1,4 +1,4 @@
-// Lamp Shade V0.6 -- dimensional prototype, not installation qualified.
+// Lamp Shade V0.7 -- dimensional prototype, not installation qualified.
 // Z=0 at ceiling-facing upper lip; dome points upward in print coordinates.
 mode="full"; // [full:ring]
 od=228; height=75; t=2; wall_inset=12; overhang=3; clear_h=11;
@@ -19,10 +19,13 @@ function rounded_linear(x,w,b)= x<=0?0:x>=w?1:b<=0?x/w:x<b?x*x/(2*b*(w-b)):x>w-b
 function slot(a)=slot_shift*rounded_linear(so-abs(u(a)),so-si,min((so-si)/3,corner_r/rw*180/PI));
 function ramp_fraction(a)=clamp((u(a)+si+ra)/ra,0,1);
 function ramp_h(a)=ramp_left_h+(clear_h-ramp_left_h)*ramp_fraction(a);
-// Rising portion ends at the left inner tab edge; continue beneath tab.
-// Follow the same rounded RHS return as the upper lip.
-function ramp_rhs(a)=u(a)<=si?1:slot(a)/slot_shift;
-function ramp_rad(a)=ramp_depth*clamp((u(a)+si+ra)/ea,0,1)*ramp_rhs(a);
+// V0.7: retain the original entry and rising ramp on the LHS.
+// Across the flat tab, smoothly join the 3 mm ramp to the tab's full inset.
+// On the RHS return, the inner wall and inner lip edge share exact XY coordinates.
+function ramp_rad(a)=
+    u(a)<=-si ? ramp_depth*clamp((u(a)+si+ra)/ea,0,1) :
+    u(a)<si ? ramp_depth+(slot_shift-ramp_depth)*smooth((u(a)+si)/(2*si)) :
+    slot(a);
 // V0.6: both lip edges derive from a single rounded radial profile.
 // Rectangular recess remains disabled. Preserve the ramp below the lip junction.
 lip_join_h=2; // provisional smooth junction height (mm)
