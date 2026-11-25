@@ -1,4 +1,4 @@
-// Lamp Shade V0.14 -- dimensional prototype, not installation qualified.
+// Lamp Shade V0.15 -- dimensional prototype, not installation qualified.
 // Z=0 at ceiling-facing upper lip; dome points upward in print coordinates.
 mode="full"; // [full:ring]
 od=228; height=75; t=2; wall_inset=12; overhang=3; clear_h=11;
@@ -32,7 +32,16 @@ function ramp_rad(a)=ramp_depth*clamp((u(a)+si+ra)/ea,0,1)*
 // Existing section topology connects the inner top edge to the wall at z=t
 // with a bevel where necessary; the outer underside spans to the wall.
 function ramp_wall_shift(a,z)=ramp_rad(a)*(ramp_h(a)>=clear_h?1:smooth((z-(t+clear_h-ramp_h(a))+0.15)/0.45));
-function shift(a,z)=ramp_wall_shift(a,z);
+// V0.15: a single local recess relative to the accepted V0.14 wall.
+// Start directly at the underside of the upper lip; no upper-edge gate.
+// Keep the lip outline and the underlying ramp functions unchanged.
+// Rounded side and lower transitions, entirely within the 19 x 4 mm footprint.
+recess_enabled=true;
+recess_edge=0.5;
+function recess_offset(a,z)=recess_enabled && z>=t && z<t+recess_h ?
+    recess_depth*smooth((si-abs(u(a)))/(recess_edge/rw*180/PI))*
+    smooth((t+recess_h-z)/recess_edge) : 0;
+function shift(a,z)=ramp_wall_shift(a,z)+recess_offset(a,z);
 // V0.13: lip-only tab. Use the accepted ramp's RHS return exactly.
 // Limit the tab displacement to the ramp depth to avoid a reversed
 // underside or an oversized bevel where the lip joins the wall.
