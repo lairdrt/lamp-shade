@@ -1,4 +1,4 @@
-// Lamp Shade V0.13 -- dimensional prototype, not installation qualified.
+// Lamp Shade V0.14 -- dimensional prototype, not installation qualified.
 // Z=0 at ceiling-facing upper lip; dome points upward in print coordinates.
 mode="full"; // [full:ring]
 od=228; height=75; t=2; wall_inset=12; overhang=3; clear_h=11;
@@ -36,9 +36,8 @@ function shift(a,z)=ramp_wall_shift(a,z);
 // V0.13: lip-only tab. Use the accepted ramp's RHS return exactly.
 // Limit the tab displacement to the ramp depth to avoid a reversed
 // underside or an oversized bevel where the lip joins the wall.
-// LHS uses the rounded tab transition; wall remains untouched.
-function lip_tab_shift(a)=u(a)<=0 ? ramp_depth*slot(a)/slot_shift :
-    min(ramp_depth,slot(a));
+// Mirror the accepted RHS profile on the LHS; wall remains untouched.
+function lip_tab_shift(a)=min(ramp_depth,slot(a));
 function lip_inner(a)=ri-lip_tab_shift(a);
 function lip_outer(a)=rw+overhang-lip_tab_shift(a);
 zs=[for(j=[0:44]) t+clear_h*j/44];
