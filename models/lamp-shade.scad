@@ -1,4 +1,4 @@
-// Lamp Shade V0.5 -- dimensional prototype, not installation qualified.
+// Lamp Shade V0.6 -- dimensional prototype, not installation qualified.
 // Z=0 at ceiling-facing upper lip; dome points upward in print coordinates.
 mode="full"; // [full:ring]
 od=228; height=75; t=2; wall_inset=12; overhang=3; clear_h=11;
@@ -23,14 +23,16 @@ function ramp_h(a)=ramp_left_h+(clear_h-ramp_left_h)*ramp_fraction(a);
 // Follow the same rounded RHS return as the upper lip.
 function ramp_rhs(a)=u(a)<=si?1:slot(a)/slot_shift;
 function ramp_rad(a)=ramp_depth*clamp((u(a)+si+ra)/ea,0,1)*ramp_rhs(a);
-// V0.5 isolation: wall follows only the ramp; rectangular recess disabled.
-// Upper tab indentation affects only the free outer edge of the top lip.
+// V0.6: both lip edges derive from a single rounded radial profile.
+// Rectangular recess remains disabled. Preserve the ramp below the lip junction.
+lip_join_h=2; // provisional smooth junction height (mm)
 function ramp_wall_shift(a,z)=ramp_rad(a)*(ramp_h(a)>=clear_h?1:smooth((z-(t+clear_h-ramp_h(a))+0.15)/0.45));
-function shift(a,z)=ramp_wall_shift(a,z);
-function lip_inner(a)=ri-shift(a,t);
-// Limit the free-edge notch so the lip cannot cross the continuous inner wall.
-// Preserve a minimum radial material width of t at the notch.
-function lip_outer(a)=max(rw+overhang-slot(a),lip_inner(a)+t);
+function lip_inner(a)=ri-slot(a);
+function lip_outer(a)=lip_inner(a)+t+overhang;
+// Connect the full-width displaced lip to the shallower ramp continuously.
+// Blend only within the tab region and the first lip_join_h mm below the lip.
+function shift(a,z)=let(b=abs(u(a))<=so?smooth((t+lip_join_h-z)/lip_join_h):0)
+    (1-b)*ramp_wall_shift(a,z)+b*slot(a);
 zs=[for(j=[0:44]) t+clear_h*j/44];
 function ring_section(a)=concat(
  [[lip_outer(a),0],[lip_outer(a),t]],
