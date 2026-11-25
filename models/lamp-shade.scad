@@ -1,4 +1,4 @@
-// Lamp Shade V0.9 -- dimensional prototype, not installation qualified.
+// Lamp Shade V0.10 -- dimensional prototype, not installation qualified.
 // Z=0 at ceiling-facing upper lip; dome points upward in print coordinates.
 mode="full"; // [full:ring]
 od=228; height=75; t=2; wall_inset=12; overhang=3; clear_h=11;
@@ -35,17 +35,15 @@ function lip_outer(a)=lip_inner(a)+t+overhang;
 // Blend only within the tab region and the first lip_join_h mm below the lip.
 function baseline_shift(a,z)=let(b=abs(u(a))<=so?smooth((t+lip_join_h-z)/lip_join_h):0)
     (1-b)*ramp_wall_shift(a,z)+b*slot(a);
-// V0.9: local rectangular recess only; retain the V0.8 ramp and lip.
-// The footprint is the inner tab width and the first 4 mm below its underside.
-// Small edge blends maintain continuity and avoid moving the lip junction.
-// Apply the same displacement to both faces to retain radial wall thickness.
+// V0.10: recess depth is referenced to the accepted ramp, not the
+// already displaced lip junction. Merge envelopes rather than stacking offsets.
+// This gives a single monotonic return from lip to recess to ramp.
 recess_blend=0.5;
 recess_enabled=true;
 function recess_offset(a,z)=recess_enabled ?
     recess_depth*smooth((si-abs(u(a)))/(recess_blend/rw*180/PI))
-    *smooth((z-t)/recess_blend)
     *smooth((t+recess_h-z)/recess_blend) : 0;
-function shift(a,z)=baseline_shift(a,z)+recess_offset(a,z);
+function shift(a,z)=max(baseline_shift(a,z),ramp_wall_shift(a,z)+recess_offset(a,z));
 zs=[for(j=[0:44]) t+clear_h*j/44];
 function ring_section(a)=concat(
  [[lip_outer(a),0],[lip_outer(a),t]],
